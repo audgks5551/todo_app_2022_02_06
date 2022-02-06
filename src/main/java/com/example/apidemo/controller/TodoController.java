@@ -67,4 +67,48 @@ public class TodoController {
 
         }
     }
+
+    @GetMapping
+    public ResponseEntity<?> retrieveTodoList() {
+
+        // 임시 유저 아이디
+        String temporaryUserId = "temporary-user";
+
+        // total todolist
+        List<TodoEntity> entities = service.retrieve(temporaryUserId);
+
+        // entities --> dtos
+        List<TodoDTO> dtos = entities.stream().map(TodoDTO::new).collect(Collectors.toList());
+
+        // build
+        ResponseDTO<TodoDTO> response = ResponseDTO.<TodoDTO>builder().data(dtos).build();
+
+        return ResponseEntity.ok().body(response);
+    }
+
+
+    @PutMapping
+    public ResponseEntity<?> updateTodo(@RequestBody TodoDTO dto) {
+
+        // 임시 유저 아이디
+        String temporaryUserId = "temporary-user";
+
+        // dto --> entity
+        TodoEntity entity = TodoDTO.toEntity(dto);
+
+        entity.setUserId(temporaryUserId);
+
+        // 1. entity update
+        // 2. total todolist 반환
+        List<TodoEntity> entities = service.update(entity);
+
+        // entities --> dtos
+        List<TodoDTO> dtos = entities.stream().map(TodoDTO::new).collect(Collectors.toList());
+
+        // build
+        ResponseDTO<TodoDTO> response = ResponseDTO.<TodoDTO>builder().data(dtos).build();
+
+        return ResponseEntity.ok().body(response);
+
+    }
 }
