@@ -31,6 +31,7 @@ public class TodoController {
         return ResponseEntity.ok().body(response);
     }
 
+    // 생성
     @PostMapping
     public ResponseEntity<?> createTodo(@RequestBody TodoDTO dto) {
         try {
@@ -68,6 +69,7 @@ public class TodoController {
         }
     }
 
+    // 전체 조회
     @GetMapping
     public ResponseEntity<?> retrieveTodoList() {
 
@@ -86,7 +88,7 @@ public class TodoController {
         return ResponseEntity.ok().body(response);
     }
 
-
+    // 수정
     @PutMapping
     public ResponseEntity<?> updateTodo(@RequestBody TodoDTO dto) {
 
@@ -112,6 +114,7 @@ public class TodoController {
 
     }
 
+    // 삭제
     @DeleteMapping
     public ResponseEntity<?> deleteTodo(@RequestBody TodoDTO dto) {
 

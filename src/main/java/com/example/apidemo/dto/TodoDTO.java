@@ -25,9 +25,9 @@ public class TodoDTO {
 
     public static TodoEntity toEntity(final TodoDTO dto) {
         return TodoEntity.builder()
-                .id(dto.getId())
                 .title(dto.getTitle())
                 .done(dto.isDone())
+                .id(dto.getId())
                 .build();
     }
 }
