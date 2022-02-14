@@ -4,6 +4,7 @@ import com.example.apidemo.dto.ResponseDTO;
 import com.example.apidemo.dto.TodoDTO;
 import com.example.apidemo.model.TodoEntity;
 import com.example.apidemo.service.TodoService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,10 +15,10 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("todo")
+@RequiredArgsConstructor
 public class TodoController {
 
-    @Autowired
-    private TodoService service;
+    private final TodoService service;
 
     @GetMapping("/test")
     public ResponseEntity<?> testTodo() {
@@ -41,15 +42,18 @@ public class TodoController {
             // dto --> entity
             TodoEntity entity = TodoDTO.toEntity(dto);
 
+            // 테스트용 아이디와 USERID 시작
             entity.setId(null);
 
             entity.setUserId(temporaryUserId);
+            // 테스트용 아이디와 USERID 종료
 
             // 1. entity save
-            // 2. total todolist
+            // 2. userid로 찾은 개체들을 반환
             List<TodoEntity> entities = service.create(entity);
 
             // entity --> dto
+            // entity 객체 하나 당 TodoDTO 객체를 하나씩 생성한 후 list에 담는다는 표현
             List<TodoDTO> dtos = entities.stream().map(TodoDTO::new).collect(Collectors.toList());
 
             // build
