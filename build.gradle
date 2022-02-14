@@ -28,10 +28,10 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	// https://mvnrepository.com/artifact/com.google.guava/guava
 	implementation group: 'com.google.guava', name: 'guava', version: '31.0.1-jre'
-	// https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt
-	implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
-	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-security
-	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: '2.6.3'
+//	// https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt
+//	implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
+//	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-security
+//	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: '2.6.3'
 
 }
 
