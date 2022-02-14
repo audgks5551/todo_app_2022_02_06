@@ -5,6 +5,7 @@ import com.example.apidemo.dto.TodoDTO;
 import com.example.apidemo.model.TodoEntity;
 import com.example.apidemo.service.TodoService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -15,137 +16,123 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("todo")
-@RequiredArgsConstructor
 public class TodoController {
 
-    private final TodoService service;
+    @Autowired
+    private TodoService service;
 
     @GetMapping("/test")
     public ResponseEntity<?> testTodo() {
-        String str = service.testService();
+        String str = service.testService(); // 테스트 서비스 사용
         List<String> list = new ArrayList<>();
         list.add(str);
-        ResponseDTO<String> response = ResponseDTO
-                .<String>builder()
-                .data(list)
-                .build();
-        return ResponseEntity.ok().body(response);
+        ResponseDTO<String> response = ResponseDTO.<String>builder().data(list).build();
+        return ResponseEntity.ok(response);
     }
 
-    // 생성
     @PostMapping
     public ResponseEntity<?> createTodo(
             @AuthenticationPrincipal String userId,
             @RequestBody TodoDTO dto) {
-
         try {
-
-            // dto --> entity
+            // (1) TodoEntity로 변환한다.
             TodoEntity entity = TodoDTO.toEntity(dto);
 
-            // id를 null로 초기화 (생성 당시에는 id가 없어야 하기 때문)
+            // (2) id를 null로 초기화 한다. 생성 당시에는 id가 없어야 하기 때문이다.
             entity.setId(null);
 
-            // @AuthenticationPrincipal에서 넘어온 userId
+            // (3) 임시 유저 아이디를 설정 해 준다. 이 부분은 4장 인증과 인가에서 수정 할 예정이다. 지금은 인증과 인가 기능이 없으므로 한 유저(temporary-user)만 로그인 없이 사용 가능한 어플리케이션인 셈이다
             entity.setUserId(userId);
 
-            // 1. entity save
-            // 2. userid로 찾은 개체들을 반환
+            // (4) 서비스를 이용해 Todo엔티티를 생성한다.
             List<TodoEntity> entities = service.create(entity);
 
-            // entity --> dto
-            // entity 객체 하나 당 TodoDTO 객체를 하나씩 생성한 후 list에 담는다는 표현
+            // (5) 자바 스트림을 이용해 리턴된 엔티티 리스트를 TodoDTO리스트로 변환한다.
+
             List<TodoDTO> dtos = entities.stream().map(TodoDTO::new).collect(Collectors.toList());
 
-            // build
+            // (6) 변환된 TodoDTO리스트를 이용해ResponseDTO를 초기화한다.
             ResponseDTO<TodoDTO> response = ResponseDTO.<TodoDTO>builder().data(dtos).build();
 
-            return ResponseEntity.ok().body(response);
-
+            // (7) ResponseDTO를 리턴한다.
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
+            // (8) 혹시 예외가 나는 경우 dto대신 error에 메시지를 넣어 리턴한다.
 
-            // when error
             String error = e.getMessage();
-
             ResponseDTO<TodoDTO> response = ResponseDTO.<TodoDTO>builder().error(error).build();
-
             return ResponseEntity.badRequest().body(response);
-
         }
     }
 
-    // 전체 조회
     @GetMapping
-    public ResponseEntity<?> retrieveTodoList(@AuthenticationPrincipal String userId) {
-
-        // total todolist
+    public ResponseEntity<?> retrieveTodoList(
+            @AuthenticationPrincipal String userId) {
+        System.out.println("UserID : " + userId);
+        // (1) 서비스 메서드의 retrieve메서드를 사용해 Todo리스트를 가져온다
         List<TodoEntity> entities = service.retrieve(userId);
 
-        // entities --> dtos
+        // (2) 자바 스트림을 이용해 리턴된 엔티티 리스트를 TodoDTO리스트로 변환한다.
         List<TodoDTO> dtos = entities.stream().map(TodoDTO::new).collect(Collectors.toList());
 
-        // build
+        // (6) 변환된 TodoDTO리스트를 이용해ResponseDTO를 초기화한다.
         ResponseDTO<TodoDTO> response = ResponseDTO.<TodoDTO>builder().data(dtos).build();
 
-        return ResponseEntity.ok().body(response);
+        // (7) ResponseDTO를 리턴한다.
+        return ResponseEntity.ok(response);
     }
 
-    // 수정
-    @PutMapping
-    public ResponseEntity<?> updateTodo(
-            @AuthenticationPrincipal String userId,
-            @RequestBody TodoDTO dto) {
 
-        // dto --> entity
+    @PutMapping
+    public ResponseEntity<?> updateTodo(@AuthenticationPrincipal String userId,
+                                        @RequestBody TodoDTO dto) {
+        // (1) dto를 entity로 변환한다.
         TodoEntity entity = TodoDTO.toEntity(dto);
 
+        // (2) id를 userId 초기화 한다.
         entity.setUserId(userId);
 
-        // 1. entity update
-        // 2. total todolist 반환
+        // (3) 서비스를 이용해 entity를 업데이트 한다.
         List<TodoEntity> entities = service.update(entity);
 
-        // entities --> dtos
+        // (4) 자바 스트림을 이용해 리턴된 엔티티 리스트를 TodoDTO리스트로 변환한다.
         List<TodoDTO> dtos = entities.stream().map(TodoDTO::new).collect(Collectors.toList());
 
-        // build
+        // (5) 변환된 TodoDTO리스트를 이용해ResponseDTO를 초기화한다.
         ResponseDTO<TodoDTO> response = ResponseDTO.<TodoDTO>builder().data(dtos).build();
 
-        return ResponseEntity.ok().body(response);
-
+        // (6) ResponseDTO를 리턴한다.
+        return ResponseEntity.ok(response);
     }
 
-    // 삭제
     @DeleteMapping
     public ResponseEntity<?> deleteTodo(
             @AuthenticationPrincipal String userId,
             @RequestBody TodoDTO dto) {
-
         try {
-
-            // dto --> entity
+            // (1) TodoEntity로 변환한다.
             TodoEntity entity = TodoDTO.toEntity(dto);
 
+            // (2) 임시 유저 아이디를 설정 해 준다.
             entity.setUserId(userId);
 
-            // 1. delete
-            // 2. retrieve
+            // (3) 서비스를 이용해 entity를 삭제 한다.
             List<TodoEntity> entities = service.delete(entity);
 
-            // entities --> dtos
+            // (4) 자바 스트림을 이용해 리턴된 엔티티 리스트를 TodoDTO리스트로 변환한다.
             List<TodoDTO> dtos = entities.stream().map(TodoDTO::new).collect(Collectors.toList());
 
+            // (5) 변환된 TodoDTO리스트를 이용해ResponseDTO를 초기화한다.
             ResponseDTO<TodoDTO> response = ResponseDTO.<TodoDTO>builder().data(dtos).build();
 
-            return ResponseEntity.ok().body(response);
+            // (6) ResponseDTO를 리턴한다.
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
-
+            // (8) 혹시 예외가 나는 경우 dto대신 error에 메시지를 넣어 리턴한다.
             String error = e.getMessage();
-
             ResponseDTO<TodoDTO> response = ResponseDTO.<TodoDTO>builder().error(error).build();
-
             return ResponseEntity.badRequest().body(response);
-
         }
     }
+
 }
