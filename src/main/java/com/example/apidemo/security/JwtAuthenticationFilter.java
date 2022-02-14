@@ -52,7 +52,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 // 인증 완료
                 AbstractAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        userId, // 인증된 사용자의 정보, 보통 UserDetails라는 객체를 넣는다
+                        userId, // 인증된 사용자의 정보, 보통 UserDetails라는 객체를 넣는다 (Controller의 매개변수로 @AuthenticationPrincipal String userId로 사용가능)
                         null,
                         AuthorityUtils.NO_AUTHORITIES
                 );
